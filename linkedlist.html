@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked List Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        .linked-list-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .node {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            border-radius: 50%;
+            position: relative;
+            margin: 10px;
+            opacity: 0;
+            transform: scale(0.5);
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .arrow {
+            width: 40px;
+            height: 2px;
+            background-color: black;
+            margin: 0 5px;
+            position: relative;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        .arrow::after {
+            content: "→";
+            position: absolute;
+            right: -15px;
+            top: -10px;
+            font-size: 20px;
+            color: black;
+        }
+
+        .double-arrow::before,
+        .double-arrow::after {
+            content: "↔";
+            position: absolute;
+            font-size: 20px;
+            color: black;
+        }
+
+        .controls {
+            margin: 20px;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 2px solid #008CBA;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #008CBA;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 5px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #005f73;
+            transform: scale(1.1);
+        }
+
+        .code-section {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.5s ease-in-out forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            overflow-x: auto;
+        }
+
+        select {
+            padding: 10px;
+            border: 2px solid #008CBA;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Linked List Visualization</h1>
+
+    <div>
+        <button onclick="setType('singly')">Singly Linked List</button>
+        <button onclick="setType('doubly')">Doubly Linked List</button>
+        <button onclick="setType('circular')">Circular Linked List</button>
+    </div>
+
+    <div class="controls">
+        <input type="number" id="node-value" placeholder="Enter Value">
+        <button onclick="insertNode()">Insert</button>
+        <button onclick="deleteNode()">Delete</button>
+    </div>
+
+    <div class="linked-list-container" id="linked-list"></div>
+
+    <h2>Code Implementations</h2>
+    
+    <select id="language-selector" onchange="updateCode()">
+        <option value="c">C</option>
+        <option value="cpp">C++</option>
+        <option value="java">Java</option>
+        <option value="python">Python</option>
+    </select>
+
+    <div class="code-section">
+        <pre id="code-display"></pre>
+    </div>
+
+    <script>
+        let linkedList = [];
+        let listType = "singly"; // Default type
+
+        const codeSnippets = {
+            c: `
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+void insert(struct Node** head, int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = *head;
+    *head = newNode;
+}
+
+void display(struct Node* head) {
+    while (head) {
+        printf("%d -> ", head->data);
+        head = head->next;
+    }
+    printf("NULL\\n");
+}`,
+            cpp: `
+#include <iostream>
+using namespace std;
+
+class Node {
+public:
+    int data;
+    Node* next;
+    Node(int val) { data = val; next = NULL; }
+};
+
+void insert(Node*& head, int value) {
+    Node* newNode = new Node(value);
+    newNode->next = head;
+    head = newNode;
+}
+
+void display(Node* head) {
+    while (head) {
+        cout << head->data << " -> ";
+        head = head->next;
+    }
+    cout << "NULL" << endl;
+}`,
+            java: `
+class Node {
+    int data;
+    Node next;
+    Node(int val) { data = val; next = null; }
+}
+
+public class LinkedList {
+    public static void main(String[] args) {
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.next = new Node(3);
+        printList(head);
+    }
+
+    static void printList(Node head) {
+        while (head != null) {
+            System.out.print(head.data + " -> ");
+            head = head.next;
+        }
+        System.out.println("NULL");
+    }
+}`,
+            python: `
+class Node:
+    def __init__(self, value):
+        self.data = value
+        self.next = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def insert(self, value):
+        new_node = Node(value)
+        new_node.next = self.head
+        self.head = new_node
+
+    def display(self):
+        temp = self.head
+        while temp:
+            print(temp.data, "->", end=" ")
+            temp = temp.next
+        print("NULL")
+
+ll = LinkedList()
+ll.insert(3)
+ll.insert(2)
+ll.insert(1)
+ll.display()`
+        };
+
+        function setType(type) {
+            listType = type;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const container = document.getElementById("linked-list");
+            container.innerHTML = "";
+
+            linkedList.forEach((value, index) => {
+                let node = document.createElement("div");
+                node.classList.add("node");
+                node.textContent = value;
+                container.appendChild(node);
+
+                if (index < linkedList.length - 1) {
+                    let arrow = document.createElement("div");
+                    arrow.classList.add("arrow");
+                    container.appendChild(arrow);
+                }
+            });
+        }
+
+        function insertNode() {
+            let value = document.getElementById("node-value").value.trim();
+            if (value === "") return;
+            linkedList.push(value);
+            document.getElementById("node-value").value = "";
+            updateDisplay();
+        }
+
+        function deleteNode() {
+            if (linkedList.length === 0) return;
+            linkedList.pop();
+            updateDisplay();
+        }
+
+        function updateCode() {
+            document.getElementById("code-display").textContent = codeSnippets[document.getElementById("language-selector").value];
+        }
+
+        updateCode();
+    </script>
+</body>
+</html>

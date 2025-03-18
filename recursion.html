@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursion Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .stack-container {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            height: 300px;
+            overflow-y: auto;
+            border: 2px solid #333;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            width: 100%;
+            max-width: 350px;
+        }
+        .stack-item {
+            width: 90%;
+            max-width: 250px;
+            padding: 10px;
+            margin: 5px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #27ae60;
+        }
+        input {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Recursion Animation</h1>
+
+    <div class="controls">
+        <label>Enter Number: </label>
+        <input type="number" id="numberInput" value="5" min="0" max="10">
+        <button class="button" onclick="startRecursion()">Start Recursion</button>
+    </div>
+
+    <h2>Call Stack</h2>
+    <div class="stack-container" id="stack"></div>
+
+    <script>
+        async function factorial(n) {
+            let stackDiv = document.getElementById("stack");
+            let item = document.createElement("div");
+            item.className = "stack-item";
+            item.textContent = `factorial(${n})`;
+            stackDiv.appendChild(item);
+
+            return new Promise(resolve => {
+                setTimeout(async () => {
+                    if (n === 0 || n === 1) {
+                        item.textContent = `factorial(${n}) = 1`;
+                        await new Promise(res => setTimeout(res, 500));
+                        stackDiv.removeChild(item);
+                        resolve(1);
+                    } else {
+                        let result = await factorial(n - 1);
+                        item.textContent = `factorial(${n}) = ${n} * ${result} = ${n * result}`;
+                        await new Promise(res => setTimeout(res, 500));
+                        stackDiv.removeChild(item);
+                        resolve(n * result);
+                    }
+                }, 800);
+            });
+        }
+
+        async function startRecursion() {
+            let num = parseInt(document.getElementById("numberInput").value);
+            document.getElementById("stack").innerHTML = "";
+            await factorial(num);
+        }
+    </script>
+
+</body>
+</html>

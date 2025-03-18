@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Visualization</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f4;
+            color: black;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        .queue-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 400px;
+            height: 100px;
+            border: 3px solid black;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .queue-element {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #61dafb, #4CAF50);
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 5px;
+            margin: 5px;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .enqueue-btn { background: #4CAF50; color: white; }
+        .dequeue-btn { background: #f44336; color: white; }
+        .circular-btn { background: #ff9800; color: white; }
+        .code-section {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid black;
+            background: white;
+            color: black;
+        }
+        pre {
+            background: #f8f8f8;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            overflow-x: auto;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Queue Visualization</h2>
+    <div class="queue-container" id="queue"></div>
+    <div class="buttons">
+        <button class="enqueue-btn" onclick="enqueueElement()">Enqueue</button>
+        <button class="dequeue-btn" onclick="dequeueElement()">Dequeue</button>
+        <button class="circular-btn" onclick="circularEnqueue()">Circular Enqueue</button>
+    </div>
+
+    <h3>Select Language:</h3>
+    <select id="languageSelector" onchange="updateCode()">
+        <option value="c">C</option>
+        <option value="cpp">C++</option>
+        <option value="java">Java</option>
+        <option value="js">JavaScript</option>
+        <option value="python">Python</option>
+    </select>
+
+    <div class="code-section">
+        <pre id="code-block">
+            // Code will be displayed here...
+        </pre>
+    </div>
+
+    <script>
+        let queue = [];
+        const queueContainer = document.getElementById("queue");
+        const maxSize = 5;
+
+        function enqueueElement() {
+            if (queue.length >= maxSize) {
+                alert("Queue Overflow!");
+                return;
+            }
+            let value = Math.floor(Math.random() * 100);
+            let element = document.createElement("div");
+            element.classList.add("queue-element");
+            element.textContent = value;
+            queueContainer.appendChild(element);
+            queue.push(value);
+            element.style.transform = "scale(1.2)";
+            setTimeout(() => element.style.transform = "scale(1)", 200);
+        }
+
+        function dequeueElement() {
+            if (queue.length === 0) {
+                alert("Queue Underflow!");
+                return;
+            }
+            let elements = document.querySelectorAll(".queue-element");
+            let frontElement = elements[0];
+            frontElement.style.transform = "translateY(-10px) scale(0)";
+            frontElement.style.opacity = "0";
+            setTimeout(() => {
+                queueContainer.removeChild(frontElement);
+                queue.shift();
+            }, 300);
+        }
+
+        function circularEnqueue() {
+            if (queue.length >= maxSize) {
+                let elements = document.querySelectorAll(".queue-element");
+                let frontElement = elements[0];
+                frontElement.style.transform = "translateX(400px)";
+                setTimeout(() => {
+                    queueContainer.removeChild(frontElement);
+                    queue.shift();
+                    enqueueElement();
+                }, 400);
+            } else {
+                enqueueElement();
+            }
+        }
+
+        function updateCode() {
+            let language = document.getElementById("languageSelector").value;
+            let codeBlock = document.getElementById("code-block");
+
+            const codeSamples = {
+                c: `
+#include <stdio.h>
+#define MAX 5
+int queue[MAX], front = -1, rear = -1;
+void enqueue(int val) { if (rear < MAX - 1) queue[++rear] = val; else printf("Overflow\\n"); }
+void dequeue() { if (front < rear) front++; else printf("Underflow\\n"); }
+void peek() { if (front < rear) printf("%d\\n", queue[front + 1]); else printf("Empty\\n"); }
+                `,
+                cpp: `
+#include <iostream>
+using namespace std;
+#define MAX 5
+int queue[MAX], front = -1, rear = -1;
+void enqueue(int val) { if (rear < MAX - 1) queue[++rear] = val; else cout << "Overflow\\n"; }
+void dequeue() { if (front < rear) front++; else cout << "Underflow\\n"; }
+void peek() { if (front < rear) cout << queue[front + 1] << "\\n"; else cout << "Empty\\n"; }
+                `,
+                java: `
+class Queue {
+    int queue[], front, rear, MAX;
+    Queue(int size) { MAX = size; queue = new int[MAX]; front = rear = -1; }
+    void enqueue(int val) { if (rear < MAX - 1) queue[++rear] = val; else System.out.println("Overflow"); }
+    void dequeue() { if (front < rear) front++; else System.out.println("Underflow"); }
+    void peek() { if (front < rear) System.out.println(queue[front + 1]); else System.out.println("Empty"); }
+}
+                `,
+                js: `
+class Queue {
+    constructor() { this.queue = []; this.MAX = 5; }
+    enqueue(val) { if (this.queue.length < this.MAX) this.queue.push(val); else console.log("Overflow"); }
+    dequeue() { if (this.queue.length > 0) this.queue.shift(); else console.log("Underflow"); }
+    peek() { console.log(this.queue.length ? this.queue[0] : "Empty"); }
+}
+                `,
+                python: `
+class Queue:
+    def __init__(self, size=5): self.queue = []; self.MAX = size
+    def enqueue(self, val): self.queue.append(val) if len(self.queue) < self.MAX else print("Overflow")
+    def dequeue(self): self.queue.pop(0) if self.queue else print("Underflow")
+    def peek(self): print(self.queue[0] if self.queue else "Empty")
+                `
+            };
+
+            codeBlock.textContent = codeSamples[language];
+        }
+
+        updateCode();
+    </script>
+</body>
+</html>

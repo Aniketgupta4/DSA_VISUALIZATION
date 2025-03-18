@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Visualization</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f4f9;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-top: 20px;
+            color: teal;
+        }
+
+        /* Controls */
+        .controls {
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 2px solid teal;
+            outline: none;
+        }
+
+        button {
+            background: teal;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #006666;
+        }
+
+        /* Tree Visualization */
+        .tree-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        svg {
+            width: 90%;
+            height: 400px;
+            background: white;
+            border: 2px solid teal;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Code Section */
+        .code-container {
+            margin: 20px auto;
+            padding: 15px;
+            width: 90%;
+            background: white;
+            border: 2px solid teal;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border: 2px solid teal;
+            border-radius: 5px;
+        }
+
+        pre {
+            text-align: left;
+            overflow-x: auto;
+            background: #eef;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌳 Tree Visualization</h1>
+
+    <div class="controls">
+        <input type="number" id="nodeValue" placeholder="Enter value">
+        <button onclick="insertNode()">Insert</button>
+        <button onclick="deleteNode()">Delete</button>
+    </div>
+
+    <div class="tree-container">
+        <svg id="treeSvg"></svg>
+    </div>
+
+    <h2>Binary Search Tree Code</h2>
+    <div class="code-container">
+        <select id="language" onchange="changeCode()">
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="js">JavaScript</option>
+            <option value="python">Python</option>
+        </select>
+        <pre id="codeBlock"></pre>
+    </div>
+
+    <script>
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        class BST {
+            constructor() {
+                this.root = null;
+            }
+
+            insert(value) {
+                this.root = this._insert(this.root, value);
+                drawTree();
+            }
+
+            _insert(node, value) {
+                if (!node) return new TreeNode(value);
+                if (value < node.value) node.left = this._insert(node.left, value);
+                else node.right = this._insert(node.right, value);
+                return node;
+            }
+
+            delete(value) {
+                this.root = this._delete(this.root, value);
+                drawTree();
+            }
+
+            _delete(node, value) {
+                if (!node) return null;
+                if (value < node.value) node.left = this._delete(node.left, value);
+                else if (value > node.value) node.right = this._delete(node.right, value);
+                else {
+                    if (!node.left) return node.right;
+                    if (!node.right) return node.left;
+                    let minNode = this._findMin(node.right);
+                    node.value = minNode.value;
+                    node.right = this._delete(node.right, minNode.value);
+                }
+                return node;
+            }
+
+            _findMin(node) {
+                while (node.left) node = node.left;
+                return node;
+            }
+        }
+
+        const bst = new BST();
+        const treeSvg = document.getElementById("treeSvg");
+
+        function insertNode() {
+            const value = document.getElementById("nodeValue").value;
+            if (value) {
+                bst.insert(parseInt(value));
+                document.getElementById("nodeValue").value = "";
+            }
+        }
+
+        function deleteNode() {
+            const value = document.getElementById("nodeValue").value;
+            if (value) {
+                bst.delete(parseInt(value));
+                document.getElementById("nodeValue").value = "";
+            }
+        }
+
+        function drawTree() {
+            treeSvg.innerHTML = "";
+            if (bst.root) drawNode(bst.root, 400, 50, 200, null);
+        }
+
+        function drawNode(node, x, y, spacing, parentX) {
+            if (!node) return;
+            if (parentX !== null) {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", parentX);
+                line.setAttribute("y1", y - 30);
+                line.setAttribute("x2", x);
+                line.setAttribute("y2", y);
+                line.setAttribute("stroke", "teal");
+                treeSvg.appendChild(line);
+            }
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", x);
+            circle.setAttribute("cy", y);
+            circle.setAttribute("r", 20);
+            circle.setAttribute("fill", "white");
+            circle.setAttribute("stroke", "teal");
+            circle.setAttribute("stroke-width", "2");
+            treeSvg.appendChild(circle);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", y + 5);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-size", "16");
+            text.setAttribute("fill", "black");
+            text.textContent = node.value;
+            treeSvg.appendChild(text);
+
+            drawNode(node.left, x - spacing, y + 50, spacing / 2, x);
+            drawNode(node.right, x + spacing, y + 50, spacing / 2, x);
+        }
+
+        const codeExamples = {
+            c: `struct Node {
+    int value;
+    struct Node *left, *right;
+};`,
+            cpp: `class Node {
+public:
+    int value;
+    Node *left, *right;
+};`,
+            java: `class Node {
+    int value;
+    Node left, right;
+};`,
+            js: `class Node {
+    constructor(value) {
+        this.value = value;
+        this.left = this.right = null;
+    }
+}`,
+            python: `class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None`
+        };
+
+        function changeCode() {
+            const lang = document.getElementById("language").value;
+            document.getElementById("codeBlock").textContent = codeExamples[lang];
+        }
+
+        changeCode();
+    </script>
+
+</body>
+</html>

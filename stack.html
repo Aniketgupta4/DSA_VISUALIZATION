@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Visualization</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f4;
+            color: black;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        .stack-container {
+            width: 200px;
+            height: 300px;
+            border: 3px solid #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .stack-element {
+            width: 80%;
+            padding: 10px;
+            background: linear-gradient(135deg, #ffa502, #ff6b6b);
+            color: black;
+            text-align: center;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-weight: bold;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .push-btn { background: #4CAF50; color: white; }
+        .pop-btn { background: #f44336; color: white; }
+        .peek-btn { background: #ff9800; color: white; }
+        .code-section {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid black;
+            background: white;
+            color: black;
+        }
+        pre {
+            background: #f8f8f8;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            overflow-x: auto;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Stack Visualization</h2>
+    <div class="stack-container" id="stack"></div>
+    <div class="buttons">
+        <button class="push-btn" onclick="pushElement()">Push</button>
+        <button class="pop-btn" onclick="popElement()">Pop</button>
+        <button class="peek-btn" onclick="peekElement()">Peek</button>
+    </div>
+
+    <h3>Select Language:</h3>
+    <select id="languageSelector" onchange="updateCode()">
+        <option value="c">C</option>
+        <option value="cpp">C++</option>
+        <option value="java">Java</option>
+        <option value="js">JavaScript</option>
+        <option value="python">Python</option>
+    </select>
+
+    <div class="code-section">
+        <pre id="code-block">
+            // Code will be displayed here...
+        </pre>
+    </div>
+
+    <script>
+        let stack = [];
+        const stackContainer = document.getElementById("stack");
+        
+        function pushElement() {
+            if (stack.length >= 5) {
+                alert("Stack Overflow!");
+                return;
+            }
+            let value = Math.floor(Math.random() * 100);
+            let element = document.createElement("div");
+            element.classList.add("stack-element");
+            element.textContent = `Push: ${value}`;
+            stackContainer.appendChild(element);
+            stack.push(value);
+            element.style.transform = "translateY(-10px) scale(1.1)";
+            setTimeout(() => element.style.transform = "translateY(0) scale(1)", 100);
+        }
+
+        function popElement() {
+            if (stack.length === 0) {
+                alert("Stack Underflow!");
+                return;
+            }
+            let elements = document.querySelectorAll(".stack-element");
+            let topElement = elements[elements.length - 1];
+            topElement.textContent = `Pop: ${stack[stack.length - 1]}`;
+            topElement.style.transform = "translateY(-10px) scale(0)";
+            topElement.style.opacity = "0";
+            setTimeout(() => {
+                stackContainer.removeChild(topElement);
+                stack.pop();
+            }, 300);
+        }
+
+        function peekElement() {
+            if (stack.length === 0) {
+                alert("Stack is Empty!");
+                return;
+            }
+            let elements = document.querySelectorAll(".stack-element");
+            let topElement = elements[elements.length - 1];
+            topElement.style.background = "#ffcc00";
+            topElement.textContent = `Peek: ${stack[stack.length - 1]}`;
+            setTimeout(() => topElement.style.background = "linear-gradient(135deg, #ffa502, #ff6b6b)", 500);
+        }
+
+        function updateCode() {
+            let language = document.getElementById("languageSelector").value;
+            let codeBlock = document.getElementById("code-block");
+
+            const codeSamples = {
+                c: `
+#include <stdio.h>
+#define MAX 5
+int stack[MAX], top = -1;
+void push(int val) { if (top < MAX - 1) stack[++top] = val; else printf("Overflow\\n"); }
+void pop() { if (top >= 0) top--; else printf("Underflow\\n"); }
+void peek() { if (top >= 0) printf("%d\\n", stack[top]); else printf("Empty\\n"); }
+                `,
+                cpp: `
+#include <iostream>
+using namespace std;
+#define MAX 5
+int stack[MAX], top = -1;
+void push(int val) { if (top < MAX - 1) stack[++top] = val; else cout << "Overflow\\n"; }
+void pop() { if (top >= 0) top--; else cout << "Underflow\\n"; }
+void peek() { if (top >= 0) cout << stack[top] << "\\n"; else cout << "Empty\\n"; }
+                `,
+                java: `
+class Stack {
+    int stack[], top, MAX;
+    Stack(int size) { MAX = size; stack = new int[MAX]; top = -1; }
+    void push(int val) { if (top < MAX - 1) stack[++top] = val; else System.out.println("Overflow"); }
+    void pop() { if (top >= 0) top--; else System.out.println("Underflow"); }
+    void peek() { if (top >= 0) System.out.println(stack[top]); else System.out.println("Empty"); }
+}
+                `,
+                js: `
+class Stack {
+    constructor() { this.stack = []; this.MAX = 5; }
+    push(val) { if (this.stack.length < this.MAX) this.stack.push(val); else console.log("Overflow"); }
+    pop() { if (this.stack.length > 0) this.stack.pop(); else console.log("Underflow"); }
+    peek() { console.log(this.stack.length ? this.stack[this.stack.length - 1] : "Empty"); }
+}
+                `,
+                python: `
+class Stack:
+    def __init__(self, size=5): self.stack = []; self.MAX = size
+    def push(self, val): self.stack.append(val) if len(self.stack) < self.MAX else print("Overflow")
+    def pop(self): self.stack.pop() if self.stack else print("Underflow")
+    def peek(self): print(self.stack[-1] if self.stack else "Empty")
+                `
+            };
+
+            codeBlock.textContent = codeSamples[language];
+        }
+
+        updateCode();
+    </script>
+</body>
+</html>

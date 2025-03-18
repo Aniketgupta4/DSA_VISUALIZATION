@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Visualization</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f4f9;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-top: 15px;
+            color: teal;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 2px solid teal;
+            outline: none;
+            width: 120px;
+        }
+
+        button {
+            background: teal;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #006666;
+        }
+
+        /* Graph Visualization */
+        .graph-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        svg {
+            width: 100%;
+            height: 400px;
+            background: white;
+            border: 2px solid teal;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Code Section */
+        .code-container {
+            margin: 15px auto;
+            padding: 15px;
+            width: 90%;
+            max-width: 900px;
+            background: white;
+            border: 2px solid teal;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        select {
+            padding: 8px;
+            font-size: 14px;
+            border: 2px solid teal;
+            border-radius: 5px;
+            width: 150px;
+        }
+
+        pre {
+            text-align: left;
+            overflow-x: auto;
+            background: #eef;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            input, button {
+                width: 100px;
+                font-size: 12px;
+            }
+
+            svg {
+                height: 300px;
+            }
+
+            pre {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            input, button {
+                width: 80px;
+                font-size: 12px;
+            }
+
+            svg {
+                height: 250px;
+            }
+
+            select {
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📊 Graph Visualization</h1>
+
+    <div class="controls">
+        <input type="text" id="nodeValue" placeholder="Enter node">
+        <button onclick="addNode()">Add Node</button>
+        <button onclick="removeNode()">Remove Node</button>
+        <input type="text" id="edgeValue" placeholder="A B (edge)">
+        <button onclick="addEdge()">Add Edge</button>
+        <button onclick="removeEdge()">Remove Edge</button>
+    </div>
+
+    <div class="graph-container">
+        <svg id="graphSvg"></svg>
+    </div>
+
+    <h2>Graph Code</h2>
+    <div class="code-container">
+        <select id="language" onchange="changeCode()">
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="js">JavaScript</option>
+            <option value="python">Python</option>
+        </select>
+        <pre id="codeBlock"></pre>
+    </div>
+
+    <script>
+        let nodes = {};
+        let edges = [];
+
+        const graphSvg = document.getElementById("graphSvg");
+
+        function addNode() {
+            const value = document.getElementById("nodeValue").value;
+            if (value && !nodes[value]) {
+                nodes[value] = { x: Math.random() * 600 + 100, y: Math.random() * 300 + 50 };
+                drawGraph();
+                document.getElementById("nodeValue").value = "";
+            }
+        }
+
+        function removeNode() {
+            const value = document.getElementById("nodeValue").value;
+            if (nodes[value]) {
+                delete nodes[value];
+                edges = edges.filter(edge => edge[0] !== value && edge[1] !== value);
+                drawGraph();
+                document.getElementById("nodeValue").value = "";
+            }
+        }
+
+        function addEdge() {
+            const value = document.getElementById("edgeValue").value.split(" ");
+            if (value.length === 2 && nodes[value[0]] && nodes[value[1]]) {
+                edges.push([value[0], value[1]]);
+                drawGraph();
+                document.getElementById("edgeValue").value = "";
+            }
+        }
+
+        function removeEdge() {
+            const value = document.getElementById("edgeValue").value.split(" ");
+            edges = edges.filter(edge => !(edge[0] === value[0] && edge[1] === value[1]));
+            drawGraph();
+            document.getElementById("edgeValue").value = "";
+        }
+
+        function drawGraph() {
+            graphSvg.innerHTML = "";
+
+            edges.forEach(([from, to]) => {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", nodes[from].x);
+                line.setAttribute("y1", nodes[from].y);
+                line.setAttribute("x2", nodes[to].x);
+                line.setAttribute("y2", nodes[to].y);
+                line.setAttribute("stroke", "teal");
+                line.setAttribute("stroke-width", "2");
+                graphSvg.appendChild(line);
+            });
+
+            Object.entries(nodes).forEach(([key, { x, y }]) => {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", 20);
+                circle.setAttribute("fill", "white");
+                circle.setAttribute("stroke", "teal");
+                circle.setAttribute("stroke-width", "2");
+                graphSvg.appendChild(circle);
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", y + 5);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", "16");
+                text.setAttribute("fill", "black");
+                text.textContent = key;
+                graphSvg.appendChild(text);
+            });
+        }
+
+        const codeExamples = {
+            c: `struct Graph { int adjMatrix[100][100]; };`,
+            cpp: `class Graph { public: vector<vector<int>> adjList; };`,
+            java: `class Graph { List<List<Integer>> adjList = new ArrayList<>(); };`,
+            js: `class Graph { constructor() { this.adjList = new Map(); } }`,
+            python: `class Graph: def __init__(self): self.adjList = {}` 
+        };
+
+        function changeCode() {
+            const lang = document.getElementById("language").value;
+            document.getElementById("codeBlock").textContent = codeExamples[lang];
+        }
+
+        changeCode();
+    </script>
+
+</body>
+</html>
